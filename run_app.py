@@ -1,4 +1,3 @@
-
 import os
 import sys
 import subprocess
@@ -21,19 +20,19 @@ def check_dependencies():
         import sqlalchemy
         import loguru
 
-        print("✅ All dependencies are installed")
+        print("All required packages are installed.")
         return True
     except ImportError as e:
-        print(f"❌ Missing dependency: {e}")
-        print("Please install dependencies with: pip install -r requirements.txt")
+        print(f"Missing dependency: {e}")
+        print("Please install all required packages using: pip install -r requirements.txt")
         return False
 
 
 def check_env_file():
     """Check if .env file exists and has required variables"""
     if not os.path.exists(".env"):
-        print("❌ .env file not found")
-        print("Please copy .env.example to .env and configure your settings")
+        print(".env file not found.")
+        print("Please copy .env.example to .env and update it with your details.")
         return False
 
     with open(".env", "r") as f:
@@ -47,29 +46,29 @@ def check_env_file():
             missing_vars.append(var)
 
     if missing_vars:
-        print(f"❌ Missing environment variables: {', '.join(missing_vars)}")
-        print("Please update your .env file with the required variables")
+        print(f"Some environment variables are missing: {', '.join(missing_vars)}")
+        print("Please add them to your .env file and try again.")
         return False
 
-    print("✅ Environment configuration is complete")
+    print("Environment setup looks fine.")
     return True
 
 
 def start_backend(port=8000):
     """Start the FastAPI backend server"""
-    print(f"🚀 Starting FastAPI backend on port {port}")
+    print(f"Starting FastAPI backend on port {port}...")
 
     try:
-
         import socket
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             if s.connect_ex(("localhost", port)) == 0:
-                print(f"⚠️  Port {port} is already in use")
-                choice = input("Do you want to use port 8001 instead? (y/n): ")
+                print(f"Port {port} is already being used by another process.")
+                choice = input("Would you like to use port 8001 instead? (y/n): ")
                 if choice.lower() == "y":
                     port = 8001
                 else:
+                    print("Okay, stopping here.")
                     sys.exit(1)
 
         cmd = [
@@ -84,33 +83,34 @@ def start_backend(port=8000):
             "--reload",
         ]
 
-        print(f"Backend will be available at: http://localhost:{port}")
-        print("Press Ctrl+C to stop the server")
+        print(f"Backend is starting. You can access it at: http://localhost:{port}")
+        print("Press Ctrl+C anytime to stop the server.")
 
         subprocess.run(cmd)
 
     except KeyboardInterrupt:
-        print("\n🛑 Stopping backend server...")
+        print("\nBackend stopped.")
     except Exception as e:
-        print(f"❌ Error starting backend: {e}")
+        print(f"Error while starting backend: {e}")
         sys.exit(1)
 
 
 def start_frontend(port=8501):
     """Start the Streamlit frontend"""
-    print(f"🎨 Starting Streamlit frontend on port {port}")
+    print(f"Starting Streamlit frontend on port {port}...")
 
     try:
-
         import socket
+
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             if s.connect_ex(("localhost", port)) == 0:
-                print(f"⚠️  Port {port} is already in use")
-                choice = input("Do you want to use port 8502 instead? (y/n): ")
+                print(f"Port {port} is already in use.")
+                choice = input("Would you like to switch to port 8502 instead? (y/n): ")
                 if choice.lower() == "y":
                     port = 8502
                 else:
+                    print("Stopping as requested.")
                     sys.exit(1)
 
         os.environ["STREAMLIT_SERVER_PORT"] = str(port)
@@ -128,21 +128,22 @@ def start_frontend(port=8501):
             "false",
         ]
 
-        print(f"Frontend will be available at: http://localhost:{port}")
-        print("Press Ctrl+C to stop the frontend")
+        print(f"Frontend is starting. Open this in your browser: http://localhost:{port}")
+        print("Press Ctrl+C anytime to stop the frontend.")
+
 
         subprocess.run(cmd)
 
     except KeyboardInterrupt:
-        print("\n🛑 Stopping frontend...")
+        print("\nFrontend stopped.")
     except Exception as e:
-        print(f"❌ Error starting frontend: {e}")
+        print(f"Error while starting frontend: {e}")
         sys.exit(1)
 
 
 def start_both(backend_port=8000, frontend_port=8501):
     """Start both backend and frontend"""
-    print("🌟 Starting Resume Parser Application")
+    print("Starting Resume Parser Application...")
     print("=" * 50)
 
     if not check_dependencies():
@@ -151,7 +152,7 @@ def start_both(backend_port=8000, frontend_port=8501):
     if not check_env_file():
         sys.exit(1)
 
-    print("\n🔧 Starting services...")
+    print("\nStarting backend and frontend services...")
 
     backend_process = subprocess.Popen(
         [
@@ -166,13 +167,13 @@ subprocess.run(cmd)
         ]
     )
 
-    print(f"⏳ Waiting for backend to start on port {backend_port}...")
+
+    print(f"Waiting for backend to start on port {backend_port}...")
     sleep(3)
 
     try:
         start_frontend(frontend_port)
     finally:
-
         backend_process.terminate()
         backend_process.wait()
 
